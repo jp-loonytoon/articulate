@@ -1,0 +1,8 @@
+numrounds: 3
+dictionary: dictionary.txt
+roundlength: 60
+max_chars: 0
+min_context: 2
+max_delay: 5
+guesser: random
+rtaUrl: wss://192.168.128.23:9000/
