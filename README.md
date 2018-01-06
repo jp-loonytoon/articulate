@@ -5,17 +5,28 @@ Articulate word game player
 
 This is a program that uses a real-time speech recognition system (currently Speechmatics ASR) to allow you to play Articulate (https://en.wikipedia.org/wiki/Articulate!).
 
-## Code Example
-
-Show what the library does as concisely as possible, developers should be able to figure out **how** your project solves their problem by looking at the code example. Make sure the API you are showing off is obvious, and that your code is short and concise.
-
 ## Motivation
 
 Originally created as part of the Speechmatics (www.speechmatics.com) 2017 Hackathon.
 
+## Getting Started
+
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+
+### Prerequisites
+
+The program is written in Python 3, to run it first timeyou'll need to use pip3 install to make sure you have the following dependencies installed:
+
+pip3 install pyyaml
+
+You also need to use the Speechmatics real-time Speech API.
+
+
 ## Installation
 
-Provide code examples and explanations of how to get the project.
+Once you've cloned the repository and installed the dependencies, you can run a quick test as follows:
+
+python3 game.py
 
 ## API Reference
 
