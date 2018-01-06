@@ -19,7 +19,7 @@ The program is written in Python 3, to run it first timeyou'll need to use pip3 
 
 pip3 install pyyaml
 
-You also need to use the Speechmatics real-time Speech API.
+You also need to use the Speechmatics real-time Speech API if you want to use a speech as input. Otherwise you can just feed in text on the command line.
 
 
 ## Installation
