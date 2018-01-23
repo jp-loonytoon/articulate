@@ -8,7 +8,6 @@ Created on Thu Dec 14 15:10:38 2017
 """
 
 
-
 import nltk
 from nltk.corpus import wordnet as wn
 from nltk.corpus import brown
@@ -24,18 +23,15 @@ grNP = """
 # more specific
 def findHyponyms(n):
     h = []
-    
+
     for synset in wn.synsets(n):
         h.append(synset.hyponyms())
-    
-    return h
 
+    return h
 
 
 def findFirstSynset(n):
     return wn.synsets(n)[0]
-
-
 
 
 # performs NP-chunking to get the noun phrases (NPs) in a sentence, and
@@ -45,62 +41,52 @@ def getNouns(sentence):
     tagged_sentence = nltk.pos_tag(sentence)
     parser = nltk.RegexpParser(grNP)
     tree = parser.parse(tagged_sentence)
- 
+
     for subtree in tree.subtrees():
-        if subtree.label() == 'NOUN': nouns.append(subtree.leaves()[0][0])
-            
+        if subtree.label() == 'NOUN':
+            nouns.append(subtree.leaves()[0][0])
+
     return nouns
-
-
-
 
 
 class SynonynGuesser:
 
-   def __init__(self, text):
-       self.numGuesses = 0
-       self.text = text
-      
-   
-    
-   def guess(self):
-       self.numGuesses += 1
-       bigrams = []
-       prevNoun = ""
-       n = 0
-       
-       # split the text into tokens...
-       tokens = nltk.word_tokenize(self.text)
-       
-       # now get the list of nouns...
-       nouns = getNouns(tokens)
-       
-       # get pairs of nouns (bigrams)
-       for noun in nouns:
-           if (n > 0):
-               bigram = (wn.synsets(prevNoun)[0], wn.synsets(noun)[0])
-               bigrams.append(bigram)
-           prevNoun = noun
-           n += 1
- 
-       # todo - score nouns by similartiy score
-       for b in bigrams:
-           lch = b[0].lowest_common_hypernyms(b[1])
-           print(b[0], b[1], lch)
+    def __init__(self, text):
+        self.numGuesses = 0
+        self.text = text
 
-       # find the lowest single hypernym that is shared by the bigram
-       # store them in a list and return the most frequent
-       # if there is no one that is most frequent, return the first one
-       # as best guess
-       
-       
-       
-       
-       # for each noun combination:
-       #   n1.path_similarity(n2)
-       #  
+    def guess(self):
+        self.numGuesses += 1
+        bigrams = []
+        prevNoun = ""
+        n = 0
 
-       return "cat"
+        # split the text into tokens...
+        tokens = nltk.word_tokenize(self.text)
 
+        # now get the list of nouns...
+        nouns = getNouns(tokens)
 
+        # get pairs of nouns (bigrams)
+        for noun in nouns:
+            if (n > 0):
+                bigram = (wn.synsets(prevNoun)[0], wn.synsets(noun)[0])
+                bigrams.append(bigram)
+            prevNoun = noun
+            n += 1
 
+        # todo - score nouns by similartiy score
+        for b in bigrams:
+            lch = b[0].lowest_common_hypernyms(b[1])
+            print(b[0], b[1], lch)
+
+        # find the lowest single hypernym that is shared by the bigram
+        # store them in a list and return the most frequent
+        # if there is no one that is most frequent, return the first one
+        # as best guess
+
+        # for each noun combination:
+        #   n1.path_similarity(n2)
+        #
+
+        return "cat"

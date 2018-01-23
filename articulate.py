@@ -14,7 +14,6 @@ import yaml
 from game import Game
 
 
-
 if __name__ == '__main__':
     config = yaml.safe_load(open("config.yml"))
 
@@ -24,4 +23,3 @@ if __name__ == '__main__':
     game.roundLength = config['roundlength']
     game.wordlist = config['dictionary']
     game.start()
-    

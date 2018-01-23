@@ -15,11 +15,15 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites
 
-The program is written in Python 3, to run it first timeyou'll need to use pip3 install to make sure you have the following dependencies installed:
+The program is written in Python 3, to run it first time you'll need to use pip3 install to make sure you have the following dependencies installed:
 
 pip3 install pyyaml
 
-You also need to use the Speechmatics real-time Speech API if you want to use a speech as input. Otherwise you can just feed in text on the command line.
+You also need to use the Speechmatics real-time Speech API if you want to use a speech as input. Otherwise you can just feed in text on the command line. You can download the sm-rtapi library from here:
+
+https://artifacts.speechmatics.io/speechmatics/realtime-libs-public/sm_rtapi-1.0.0.tar.gz
+
+Unpack the tarball and copy the sm_rtapi folder into the articulate source folder.
 
 
 ## Installation
