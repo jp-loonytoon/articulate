@@ -5,4 +5,4 @@ max_chars: 0
 min_context: 2
 max_delay: 5
 guesser: random
-rtaUrl: wss://192.168.128.23:9000/
+rtaUrl: wss://192.168.128.147:9000/

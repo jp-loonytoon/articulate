@@ -65,22 +65,41 @@ class SynonynGuesser:
     
    def guess(self):
        self.numGuesses += 1
+       bigrams = []
+       prevNoun = ""
+       n = 0
        
        # split the text into tokens...
        tokens = nltk.word_tokenize(self.text)
        
        # now get the list of nouns...
        nouns = getNouns(tokens)
+       
+       # get pairs of nouns (bigrams)
        for noun in nouns:
-          print(noun)          
-           
+           if (n > 0):
+               bigram = (wn.synsets(prevNoun)[0], wn.synsets(noun)[0])
+               bigrams.append(bigram)
+           prevNoun = noun
+           n += 1
  
        # todo - score nouns by similartiy score
+       for b in bigrams:
+           lch = b[0].lowest_common_hypernyms(b[1])
+           print(b[0], b[1], lch)
+
+       # find the lowest single hypernym that is shared by the bigram
+       # store them in a list and return the most frequent
+       # if there is no one that is most frequent, return the first one
+       # as best guess
+       
+       
+       
+       
        # for each noun combination:
        #   n1.path_similarity(n2)
-       # 
-         
-       
+       #  
+
        return "cat"
 
 

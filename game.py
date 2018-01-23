@@ -12,11 +12,6 @@ import sys
 import yaml
 import random
 
-from SpeechmaticsAPI import SpeechmaticsAPI, SpeechmaticsAPIError, SpeechmaticsAPIJobError
-from SpeechmaticsAPI.RecognitionConsumers.PrintingRecognitionConsumer import PrintingRecognitionConsumer
-from SpeechmaticsAPI.RecognitionConsumers.CollectingRecognitionConsumer import CollectingRecognitionConsumer
-from SpeechmaticsAPI.AudioSources.MicrophoneAudioSource import MicrophoneAudioSource
-from SpeechmaticsAPI.AudioSources.FileAudioSource import FileAudioSource
 
 from twisted.python import log
 from twisted.internet import reactor
@@ -24,6 +19,11 @@ from autobahn.twisted.websocket import WebSocketClientFactory
 from wordguesserclient import WordGuesserClientProtocol
 
 from synonymguesser import SynonynGuesser
+
+from sm_rtapi.rtapi import SpeechmaticsAPI
+from sm_rtapi.exceptions import SpeechmaticsAPIError, SpeechmaticsAPIJobError
+from sm_rtapi.recognitionconsumers.collecting import CollectingRecognitionConsumer
+from sm_rtapi.audiosources.file import FileAudioSource
 
 
 
@@ -37,13 +37,17 @@ def startASR(apiUrl, lang):
     
     try:
         api = SpeechmaticsAPI(apiUrl)
-        # api.transcribe(FileAudioSource(filename), lang, CollectingRecognitionConsumer())
-        # api.transcribe(FileAudioSource(filename), lang, PrintingRecognitionConsumer())
+        consumer = CollectingRecognitionConsumer()
+        api.transcribe(FileAudioSource(filename), lang, consumer)
         # api.transcribe(MicrophoneAudioSource(), lang, PrintingRecognitionConsumer())
         api.run()
         
-        if api.getError() != None:
-            raise api.getError()
+        
+        if api.get_error() is not None:
+            raise api.get_error()
+        else:
+            print(consumer.transcript)
+
 
     except SpeechmaticsAPIJobError as e:
         log.err(e)
@@ -84,9 +88,6 @@ class Game:
                   ln = ln.rstrip()
                   if (ln[0] != '['):
                      self.words.append(ln)
-
-              for w in self.words:
-                  print(w)
               
           except IOError:
              print("Could not read file:", dictionaryFile)
