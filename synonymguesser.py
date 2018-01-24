@@ -89,4 +89,4 @@ class SynonynGuesser:
         #   n1.path_similarity(n2)
         #
 
-        return "cat"
+        return "rabbit"
