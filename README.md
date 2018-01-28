@@ -23,7 +23,7 @@ You also need to use the Speechmatics real-time Speech API if you want to use a 
 
 https://artifacts.speechmatics.io/speechmatics/realtime-libs-public/sm_rtapi-1.0.0.tar.gz
 
-Unpack the tarball and copy the sm_rtapi folder into the articulate source folder.
+Unpack the tarball and copy the sm_rtapi folder into the articulate source folder. **Note:** this is a local Speechmatics URL.
 
 
 ## Installation
