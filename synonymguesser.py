@@ -7,11 +7,9 @@ Created on Thu Dec 14 15:10:38 2017
 @author: jamesp@speechmatics.com
 """
 
-
 import nltk
 from nltk.corpus import wordnet as wn
 from nltk.corpus import brown
-
 
 # a grammar for pulling out nouns
 grNP = """

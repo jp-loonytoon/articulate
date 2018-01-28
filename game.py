@@ -19,11 +19,10 @@ Example usage::
     game.start()
 """
 
-
 import sys
+import io
 import yaml
 import random
-
 
 from twisted.python import log
 from twisted.internet import reactor
@@ -31,37 +30,45 @@ from autobahn.twisted.websocket import WebSocketClientFactory
 from wordguesserclient import WordGuesserClientProtocol
 
 from synonymguesser import SynonynGuesser
+from inputtype import InputType
 
 from sm_rtapi.rtapi import SpeechmaticsAPI
 from sm_rtapi.exceptions import SpeechmaticsAPIError, SpeechmaticsAPIJobError
 from sm_rtapi.recognitionconsumers.collecting import CollectingRecognitionConsumer
 from sm_rtapi.audiosources.file import FileAudioSource
+from sm_rtapi.audiosources.microphone import MicrophoneAudioSource
 
 
-def startASR(apiUrl, lang):
+def startASR(apiUrl, lang, inputType=InputType.AUDIOFILE, inputFileName='example.wav'):
     """Start the Real-Time ASR.
 
     Args:
        apiUrl (string): The URI of the WebSocket to use for the Real-Time Appliance.
        lang (string): A language code as specified on the website. For example "en-US".
+       inputType (InputType): InputType.MICROPHONE | InputType.AUDIOFILE
+       inputFileName (string): Name of the audio file to use (used if InputType.AUDIOFILE)
     """
 
-    transcriptChunk = ""
-
-    # example file for testing, eventually we'll use the microphone
-    filename = "example.wav"
+    transcriptChunk = None
 
     try:
         api = SpeechmaticsAPI(apiUrl)
         consumer = CollectingRecognitionConsumer()
-        api.transcribe(FileAudioSource(filename), lang, consumer)
-        # api.transcribe(MicrophoneAudioSource(), lang, PrintingRecognitionConsumer())
+
+        if (inputType == InputType.AUDIOFILE):
+            api.transcribe(FileAudioSource(inputFileName), lang, consumer)
+        elif (inputType == InputType.MICROPHONE):
+            api.transcribe(MicrophoneAudioSource(), lang, consumer)
+        else:
+            log.err("Bad input type " + inputType)
+            sys.exit(3)
+
         api.run()
 
         if api.get_error() is not None:
             raise api.get_error()
         else:
-            print(consumer.transcript)
+            transcriptChunk = consumer.transcript()
 
     except SpeechmaticsAPIJobError as e:
         log.err(e)
@@ -70,25 +77,42 @@ def startASR(apiUrl, lang):
         log.err(e)
         sys.exit(1)
 
-
-def startGuesserClient():
-    factory = WebSocketClientFactory()
-    factory.protocol = WordGuesserClientProtocol
-    reactor.connectTCP("localhost", 9002, factory)
-    reactor.run()
+    return transcriptChunk
 
 
-guesserType = "synonym"      # random | synonym | corpus
+def readTextFile(ts):
+    """Read input from a text file
+
+    Args:
+       ts (io.TextIOWrapper): The text file to use
+    """
+
+    try:
+        transcriptChunk = ts.read().replace('\n', '')
+
+    except IOError:
+        print("Could not read file:")
+        sys.exit()
+
+    print(transcriptChunk)
+
+    return transcriptChunk
+
+
+guesserType = "synonym"  # random | synonym | corpus
 
 
 class Game:
 
-    def __init__(self, rtaUrl):
+    def __init__(self, inputType):
+        self.inputType = inputType
+        self.input = None
         self.rounds = 1
         self.length = 60
         self.languageCode = 'en-US'
         self.words = []
-        self.wsEndpoint = rtaUrl
+        self.wsEndpoint = None
+
         log.startLogging(sys.stdout)
 
     def loadDictionary(self, dictionaryFile):
@@ -140,21 +164,24 @@ class Game:
         print("The word guessed is: %s" % targetWord)
 
     def start(self):
-        log.msg("Starting a game of %d rounds" % (self.rounds))
-        self.loadDictionary("dictionary.txt")
+        log.msg("Input type = " + str(self.inputType))
+        log.msg("Input = " + str(self.input))
 
-        # 1. open an Real-Time ASR session and start transcribing
-        startASR(self.wsEndpoint, self.languageCode)
+        self.loadDictionary("dictionary.txt")
+        transcript = ""
+
+        if (self.inputType == InputType.MICROPHONE):
+            # 1a. process text from speech using Real-Time ASR session...
+            transcript = startASR(self.wsEndpoint, self.languageCode, self.inputType)
+        elif (self.inputType == InputType.AUDIOFILE):
+            # 1b. process text from audio file using Real-Time ASR session...
+            transcript = startASR(self.wsEndpoint, self.languageCode, self.inputType, str(self.input))
+        elif (self.inputType == InputType.TEXTFILE):
+            # 1c. read in the text from a file...
+            transcript = readTextFile(self.input)
 
         # 2. choose a guesser and start feeding it transcribed phrases
-        log.msg("Openning connection to Guesser: %s" % (guesserType))
-        # startGuesserClient()
-
-        s1 = "This is a type of animal that has whiskers and purrs. They like milk."
-        s2 = "This city is the capital of France."
-
-        self.guessTranscript(s1)
-        self.guessTranscript(s2)
+        self.guessTranscript(transcript)
 
     def stop(self):
         reactor.stop()
@@ -163,8 +190,9 @@ class Game:
 if __name__ == '__main__':
     config = yaml.safe_load(open("config.yml"))
 
-    # create a new game
-    game = Game(config['rtaUrl'])
+    # create a new game and pass it a text file with the transcript
+    game = Game(InputType.TEXTFILE)
+    game.input = io.open('example.txt', mode="r", encoding="utf-8")
     game.rounds = config['numrounds']
     game.roundLength = config['roundlength']
     game.wordlist = config['dictionary']
