@@ -56,6 +56,7 @@ class SynonynGuesser:
     def guess(self):
         self.numGuesses += 1
         bigrams = []
+        terms = []
         prevNoun = ""
         n = 0
 
@@ -76,7 +77,7 @@ class SynonynGuesser:
         # todo - score nouns by similartiy score
         for b in bigrams:
             lch = b[0].lowest_common_hypernyms(b[1])
-            print(b[0], b[1], lch)
+            terms.append(lch)
 
         # find the lowest single hypernym that is shared by the bigram
         # store them in a list and return the most frequent
@@ -86,5 +87,7 @@ class SynonynGuesser:
         # for each noun combination:
         #   n1.path_similarity(n2)
         #
+        for t in terms:
+            print(t)
 
         return "rabbit"
