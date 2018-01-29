@@ -41,7 +41,6 @@ Game object:
 """
 
 if __name__ == '__main__':
-
     # create a arg parser to process cmdline
     parser = argparse.ArgumentParser(description='An Articulate game player for that demonstrates real-time ASR and NLP techniques.')
     parser.add_argument('-m', '--microphone', action='store_true', help='use microphone audio input (requires use of an RTA)')
