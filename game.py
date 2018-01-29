@@ -12,7 +12,7 @@
 """Starts a game of Articulate
 
 Example usage::
-    
+
     game = Game('wss://rt1.lab1.example.com:9000/')
     game.rounds = 3
     game.roundLength = 60
@@ -39,6 +39,7 @@ from sm_rtapi.audiosources.file import FileAudioSource
 from sm_rtapi.audiosources.microphone import MicrophoneAudioSource
 
 
+
 def startASR(apiUrl, lang, inputType=InputType.AUDIOFILE, inputFileName='example.wav'):
     """Start the Real-Time ASR.
 
@@ -49,7 +50,7 @@ def startASR(apiUrl, lang, inputType=InputType.AUDIOFILE, inputFileName='example
        inputFileName (string): Name of the audio file to use (used if InputType.AUDIOFILE)
     """
 
-    transcriptChunk = None
+    transcriptChunk = ""
 
     try:
         api = SpeechmaticsAPI(apiUrl)
@@ -68,7 +69,7 @@ def startASR(apiUrl, lang, inputType=InputType.AUDIOFILE, inputFileName='example
         if api.get_error() is not None:
             raise api.get_error()
         else:
-            transcriptChunk = consumer.transcript()
+            transcriptChunk = consumer.transcript
 
     except SpeechmaticsAPIJobError as e:
         log.err(e)
@@ -115,6 +116,8 @@ class Game:
 
         log.startLogging(sys.stdout)
 
+
+
     def loadDictionary(self, dictionaryFile):
         with open(dictionaryFile, 'r') as f:
             try:
@@ -126,6 +129,7 @@ class Game:
             except IOError:
                 print("Could not read file:", dictionaryFile)
                 sys.exit()
+
 
     # a random word guesser (for comparative testing)
     def guessTranscriptRandom(self, transcript):
@@ -175,10 +179,13 @@ class Game:
             transcript = startASR(self.wsEndpoint, self.languageCode, self.inputType)
         elif (self.inputType == InputType.AUDIOFILE):
             # 1b. process text from audio file using Real-Time ASR session...
-            transcript = startASR(self.wsEndpoint, self.languageCode, self.inputType, str(self.input))
+            log.msg("Audio file = " + str(self.input.name))
+            transcript = startASR(self.wsEndpoint, self.languageCode, self.inputType, str(self.input.name))
         elif (self.inputType == InputType.TEXTFILE):
             # 1c. read in the text from a file...
             transcript = readTextFile(self.input)
+
+        log.msg("Transcript: " + transcript)
 
         # 2. choose a guesser and start feeding it transcribed phrases
         self.guessTranscript(transcript)
