@@ -26,8 +26,6 @@ import random
 
 from twisted.python import log
 from twisted.internet import reactor
-from autobahn.twisted.websocket import WebSocketClientFactory
-from wordguesserclient import WordGuesserClientProtocol
 
 from synonymguesser import SynonynGuesser
 from inputtype import InputType

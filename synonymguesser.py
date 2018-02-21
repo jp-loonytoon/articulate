@@ -42,7 +42,10 @@ def getNouns(sentence):
 
     for subtree in tree.subtrees():
         if subtree.label() == 'NOUN':
-            nouns.append(subtree.leaves()[0][0])
+            for l in subtree.leaves():
+                if (l[1] == 'NN' or l[1] == 'NNS'):
+                    print(l[0])
+                    nouns.append(l[0]) 
 
     return nouns
 
@@ -68,6 +71,7 @@ class SynonynGuesser:
 
         # get pairs of nouns (bigrams)
         for noun in nouns:
+            print("Noun = " + noun)
             if (n > 0):
                 bigram = (wn.synsets(prevNoun)[0], wn.synsets(noun)[0])
                 bigrams.append(bigram)
@@ -91,3 +95,13 @@ class SynonynGuesser:
             print(t)
 
         return "rabbit"
+
+
+
+if __name__ == '__main__':
+    transcript = "This animal is a type of rodent; it has big teeth and long floppy ears."
+    
+    synGuesser = SynonynGuesser(transcript)
+    targetWord = synGuesser.guess()
+    
+    print(targetWord)
