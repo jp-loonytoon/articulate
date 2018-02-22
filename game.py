@@ -1,5 +1,5 @@
-#!/usr/bin/env python
-
+# -*- coding: utf-8 -*-
+#
 # Game.py - controls the game by talking to the ASR and
 # the word hypothesizer
 #
@@ -103,6 +103,7 @@ def readTextFile(ts):
 guesserType = "synonym"  # random | synonym | corpus
 
 
+
 class Game:
 
     def __init__(self, inputType):
@@ -140,12 +141,14 @@ class Game:
 
         return targetWord
 
+
     # a synonym word guesser
     def guessTranscriptSynonym(self, transcript):
         synGuesser = SynonynGuesser(transcript)
         targetWord = synGuesser.guess()
 
         return targetWord
+
 
     # a corpus-based word guesser
     def guessTranscriptCorpus(self, transcript):
@@ -190,8 +193,12 @@ class Game:
         # 2. choose a guesser and start feeding it transcribed phrases
         self.guessTranscript(transcript)
 
+
+
     def stop(self):
         reactor.stop()
+
+
 
 
 if __name__ == '__main__':
