@@ -10,9 +10,9 @@ Created on Wed Dec 13 14:15:37 2017
 
 """
 
-import yaml
 import argparse
 import sys
+import yaml
 from game import Game
 from inputtype import InputType
 
@@ -20,16 +20,16 @@ from inputtype import InputType
 
 """ the game should support the following ways of getting text in to the
 Game object:
-    
+
     typing (stdio)
     speech (via RTA Speech API)
     audio file (via RTA Speech API)
-    
+
     Usage: articulate [options]
-    
-    An Articulate game player for that demonstrates real-time ASR 
+
+    An Articulate game player for that demonstrates real-time ASR
     and NLP techniques.
-    
+
     Options include:
         -m             use microphone audio input (requires use of an RTA)
         -w [uri]       use Websocket URI to connet to RTA
@@ -37,7 +37,6 @@ Game object:
         -t [filename]  use text file input
         -s             use stdio for keyboard input
         -c [filename]  take configuration from YAML file
-    
 """
 
 if __name__ == '__main__':
@@ -58,17 +57,17 @@ if __name__ == '__main__':
     # websockets URI is specified, then text file or stdin
     # are the only mechanisms that can be used to input
     # text to the game
-    if (args.websocket):
+    if args.websocket:
         rtaUrl = args.websocket
     else:
         rtaUrl = config['rtaUrl']
 
     # defines which input type of text will be used
-    if (args.microphone):
+    if args.microphone:
         inputType = InputType.MICROPHONE
-    elif (args.audiofile):
+    elif args.audiofile:
         inputType = InputType.AUDIOFILE
-    elif (args.textfile):
+    elif args.textfile:
         inputType = InputType.TEXTFILE
     else:
         inputType = InputType.STDIO
@@ -87,7 +86,7 @@ if __name__ == '__main__':
         if inputType == InputType.TEXTFILE:
             game.input = args.textfile
         if inputType == InputType.STDIO:
-            game.input = sys.stdio
+            game.input = sys.stdin
     except NameError:
         print("Input not defined for " + inputType)
     else:
