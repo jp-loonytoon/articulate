@@ -1,10 +1,20 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-synonymguesser.py
-Created on Thu Dec 14 15:10:38 2017
+#
+# SynonynGuesser.py - tries to guess a word
+#   by an analysis of synonyms in the NPs of the sentence
+#
+# Author: jamesp@speechmatics.com
+#
+#
+#
 
-@author: jamesp@speechmatics.com
+
+"""
+
+Example usage::
+
+    g = SynonynGuesser('This thing is a type of animal that has big ears.')
+    word = g.guess()
 """
 
 import nltk
@@ -53,18 +63,22 @@ class SynonynGuesser:
         self.numGuesses = 0
         self.text = text
 
+
+    def getNouns(self):
+        tokens = nltk.word_tokenize(self.text)
+
+        return getNouns(tokens)
+
+
     def guess(self):
-        self.numGuesses += 1
         bigrams = []
         terms = []
         prevNoun = ""
         n = 0
 
-        # split the text into tokens...
-        tokens = nltk.word_tokenize(self.text)
+        self.numGuesses += 1
 
-        # now get the list of nouns...
-        nouns = getNouns(tokens)
+        nouns = getNouns(self)
 
         # get pairs of nouns (bigrams)
         for noun in nouns:
@@ -78,6 +92,7 @@ class SynonynGuesser:
         for b in bigrams:
             lch = b[0].lowest_common_hypernyms(b[1])
             terms.append(lch)
+            print(b)
 
         # find the lowest single hypernym that is shared by the bigram
         # store them in a list and return the most frequent
