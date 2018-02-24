@@ -1,20 +1,9 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-#
-# SynonynGuesser.py - tries to guess a word
-#   by an analysis of synonyms in the NPs of the sentence
-#
-# Author: jamesp@speechmatics.com
-#
-#
-#
-
-
 """
-
-Example usage::
-
-    g = SynonynGuesser('This thing is a type of animal that has big ears.')
-    word = g.guess()
+synonymguesser.py
+Created on Thu Dec 14 15:10:38 2017
+@author: jamesp@speechmatics.com
 """
 
 import nltk
@@ -52,9 +41,13 @@ def getNouns(sentence):
 
     for subtree in tree.subtrees():
         if subtree.label() == 'NOUN':
-            nouns.append(subtree.leaves()[0][0])
+            for l in subtree.leaves():
+                if (l[1] == 'NN' or l[1] == 'NNS'):
+                    nouns.append(l[0])
 
     return nouns
+
+
 
 
 class SynonynGuesser:
@@ -63,46 +56,40 @@ class SynonynGuesser:
         self.numGuesses = 0
         self.text = text
 
-
-    def getNouns(self):
-        tokens = nltk.word_tokenize(self.text)
-
-        return getNouns(tokens)
-
-
     def guess(self):
-        bigrams = []
-        terms = []
-        prevNoun = ""
-        n = 0
-
         self.numGuesses += 1
 
-        nouns = getNouns(self)
+        # split the text into tokens...
+        tokens = nltk.word_tokenize(self.text)
 
-        # get pairs of nouns (bigrams)
-        for noun in nouns:
-            if (n > 0):
-                bigram = (wn.synsets(prevNoun)[0], wn.synsets(noun)[0])
-                bigrams.append(bigram)
-            prevNoun = noun
-            n += 1
+        # now get the list of nouns...
+        nouns = getNouns(tokens)
 
-        # todo - score nouns by similartiy score
-        for b in bigrams:
-            lch = b[0].lowest_common_hypernyms(b[1])
-            terms.append(lch)
-            print(b)
+        # now build the hypernyms list for these nouns
+        hypernyms = []
+        for n in nouns:
+            for syn in wn.synsets(n):
+                hypernyms.append(syn.hypernyms())
 
-        # find the lowest single hypernym that is shared by the bigram
-        # store them in a list and return the most frequent
-        # if there is no one that is most frequent, return the first one
-        # as best guess
+        hyponyms = []
+        # and pick the most common synonym
+        for h in hypernyms:
+            for s in h:
+                for ho in s.hyponyms():
+                    hyponyms.append(ho)
 
-        # for each noun combination:
-        #   n1.path_similarity(n2)
-        #
-        for t in terms:
-            print(t)
+        commonestHyponym = max(set(hyponyms), key=hyponyms.count)
+        likelyWord = commonestHyponym.lemma_names()[0]
 
-        return "rabbit"
+
+        return likelyWord
+
+
+
+if __name__ == '__main__':
+    transcript = "This animal is a type of rodent; it has big teeth and long floppy ears."
+
+    synGuesser = SynonynGuesser(transcript)
+    targetWord = synGuesser.guess()
+
+    print(targetWord)
