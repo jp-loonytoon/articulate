@@ -8,41 +8,33 @@ Created on Thu Dec 14 15:10:38 2017
 
 import nltk
 from nltk.corpus import wordnet as wn
-from nltk.corpus import brown
 
 # a grammar for pulling out nouns
-grNP = """
-	NOUN:   {<PRP>?<JJ.*>*<NN.*>+}
+GR_NP = """
+    NOUN:   {<PRP>?<JJ.*>*<NN.*>+}
     """
 
 
-# find all the hyponyms of a noun, that is words that are
-# more specific
-def findHyponyms(n):
-    h = []
-
-    for synset in wn.synsets(n):
-        h.append(synset.hyponyms())
-
-    return h
-
-
-def findFirstSynset(n):
-    return wn.synsets(n)[0]
-
-
-# performs NP-chunking to get the noun phrases (NPs) in a sentence, and
-# return as a list of tuples
-def getNouns(sentence):
+def get_nouns(sentence):
+    """Performs NP-chunking to get the nouns in a sentence, 
+    and return as a list of words
+    
+    Args:
+        sentence (str): The sentence to parse.
+        
+    Returns:
+        list: nouns in the sentence."""
+    
     nouns = []
+    
     tagged_sentence = nltk.pos_tag(sentence)
-    parser = nltk.RegexpParser(grNP)
+    parser = nltk.RegexpParser(GR_NP)
     tree = parser.parse(tagged_sentence)
 
     for subtree in tree.subtrees():
         if subtree.label() == 'NOUN':
             for l in subtree.leaves():
-                if (l[1] == 'NN' or l[1] == 'NNS'):
+                if l[1] == 'NN' or l[1] == 'NNS':
                     nouns.append(l[0])
 
     return nouns
@@ -51,6 +43,16 @@ def getNouns(sentence):
 
 
 class SynonynGuesser:
+    """A guesser that bases its hypotheses on finding synonyms.
+    
+    Args:
+        text (str): The initial paragraph to base the guess on.
+        
+    Attributes:
+        numGuesses (int): The number of guesses that have been made.
+        text (str): The whole text no which to base the guesses.
+    """
+        
 
     def __init__(self, text):
         self.numGuesses = 0
@@ -63,33 +65,37 @@ class SynonynGuesser:
         tokens = nltk.word_tokenize(self.text)
 
         # now get the list of nouns...
-        nouns = getNouns(tokens)
+        nouns = get_nouns(tokens)
 
-        # now build the hypernyms list for these nouns
+        # now build a list of hypernyms for these nouns
         hypernyms = []
         for n in nouns:
             for syn in wn.synsets(n):
                 hypernyms.append(syn.hypernyms())
 
+        # and pick the most common hyponym
         hyponyms = []
-        # and pick the most common synonym
         for h in hypernyms:
             for s in h:
                 for ho in s.hyponyms():
-                    hyponyms.append(ho)
+                    # weed out any words that are in the text itself
+                    if (ho.lemma_names()[0]) not in set(tokens):
+                        hyponyms.append(ho)
 
+        # find the most frequent hyponym
         commonestHyponym = max(set(hyponyms), key=hyponyms.count)
+        
         likelyWord = commonestHyponym.lemma_names()[0]
-
 
         return likelyWord
 
 
 
 if __name__ == '__main__':
-    transcript = "This animal is a type of rodent; it has big teeth and long floppy ears."
+    TRANSCRIPT = "A big ship that sank in 1912 because it hit an iceberg."
 
-    synGuesser = SynonynGuesser(transcript)
+    synGuesser = SynonynGuesser(TRANSCRIPT)
     targetWord = synGuesser.guess()
 
     print(targetWord)
+    
